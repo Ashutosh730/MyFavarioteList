@@ -25,7 +25,7 @@ public class Manager {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
 
-        HashSet itemSet = new HashSet(Arrays.asList(category.getItem()));
+        HashSet itemSet = new HashSet(category.getItem());
         editor.putStringSet(category.getName(),itemSet);
         editor.apply();
 

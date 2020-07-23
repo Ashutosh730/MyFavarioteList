@@ -22,4 +22,9 @@ public class Category implements Serializable {
     public ArrayList<String> getItem() {
         return item;
     }
+
+
+    public void setItem(ArrayList<String> item) {
+        this.item = item;
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.myfavariotelist;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements Category_Adpater.CategoryIsClicked {
 
+    private static final int MAIN_ACTIVITY_REQUEST_CODE = 1000;
     private RecyclerView recyclerView;
     private Manager manager=new Manager(this);
 
@@ -110,7 +113,27 @@ public class MainActivity extends AppCompatActivity implements Category_Adpater.
 
         Intent ItemIntent=new Intent(this,CategoryItemActivity.class);
         ItemIntent.putExtra(CATEGORY_OBJECT_KEY,category);
-        startActivity(ItemIntent);
+        startActivityForResult(ItemIntent,MAIN_ACTIVITY_REQUEST_CODE);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode==MAIN_ACTIVITY_REQUEST_CODE&&resultCode==MainActivity.RESULT_OK){
+            if(data!=null){
+                manager.saveCategory((Category) data.getSerializableExtra(CATEGORY_OBJECT_KEY));
+                updateCategories();
+            }
+        }
+
+    }
+
+    private void updateCategories() {
+
+        ArrayList<Category> categories = manager.retrive();
+        recyclerView.setAdapter(new Category_Adpater(categories,this));
 
     }
 
@@ -120,4 +143,6 @@ public class MainActivity extends AppCompatActivity implements Category_Adpater.
         displayItem(category);
 
     }
+
+
 }
