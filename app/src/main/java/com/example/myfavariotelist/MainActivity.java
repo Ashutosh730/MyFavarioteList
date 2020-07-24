@@ -24,17 +24,17 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements Category_Adpater.CategoryIsClicked {
+public class MainActivity extends AppCompatActivity implements CategoryFragment.OnCategoryInteractionListener {
 
     private static final int MAIN_ACTIVITY_REQUEST_CODE = 1000;
-    private RecyclerView recyclerView;
-    private Manager manager=new Manager(this);
 
     public static final String CATEGORY_OBJECT_KEY="CATEGORY_KEY";
+    private CategoryFragment categoryFragment=CategoryFragment.newInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,10 +45,7 @@ public class MainActivity extends AppCompatActivity implements Category_Adpater.
         FloatingActionButton fab = findViewById(R.id.fab);
 
 
-        ArrayList<Category> categories=manager.retrive();
-        recyclerView=findViewById(R.id.Recycler_view);
-        recyclerView.setAdapter(new Category_Adpater(categories,this));
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,categoryFragment).commit();
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,10 +93,7 @@ public class MainActivity extends AppCompatActivity implements Category_Adpater.
 
 
                 Category category=new Category(txt.getText().toString(),new ArrayList<String>());
-                manager.saveCategory(category);
-
-                Category_Adpater category_adpater=(Category_Adpater) recyclerView.getAdapter();
-                category_adpater.addCategory(category);
+                categoryFragment.giveCategoryToManager(category);
 
                 dialogInterface.dismiss();
                 displayItem(category);
@@ -123,26 +117,16 @@ public class MainActivity extends AppCompatActivity implements Category_Adpater.
 
         if(requestCode==MAIN_ACTIVITY_REQUEST_CODE&&resultCode==MainActivity.RESULT_OK){
             if(data!=null){
-                manager.saveCategory((Category) data.getSerializableExtra(CATEGORY_OBJECT_KEY));
-                updateCategories();
+                categoryFragment.saveCategory((Category)data.getSerializableExtra(CATEGORY_OBJECT_KEY));
+
             }
         }
 
     }
 
-    private void updateCategories() {
-
-        ArrayList<Category> categories = manager.retrive();
-        recyclerView.setAdapter(new Category_Adpater(categories,this));
-
-    }
 
     @Override
-    public void categoryIsClicked(Category category) {
-
-        displayItem(category);
-
+    public void CategoryIsTapped(Category category) {
+            displayItem(category);
     }
-
-
 }
