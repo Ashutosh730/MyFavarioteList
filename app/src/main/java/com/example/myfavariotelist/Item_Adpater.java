@@ -1,6 +1,7 @@
 package com.example.myfavariotelist;
 
 import android.content.Context;
+import android.view.CollapsibleActionView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,10 @@ public class Item_Adpater extends RecyclerView.Adapter<Item_view_holder> {
 
 
     private Category categories;
+
+    public void setCategory(Category category){
+        categories=category;
+    }
 
     public Item_Adpater(Category category) {
         categories = category;

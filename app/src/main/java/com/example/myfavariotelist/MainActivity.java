@@ -34,7 +34,12 @@ public class MainActivity extends AppCompatActivity implements CategoryFragment.
     private static final int MAIN_ACTIVITY_REQUEST_CODE = 1000;
 
     public static final String CATEGORY_OBJECT_KEY="CATEGORY_KEY";
-    private CategoryFragment categoryFragment=CategoryFragment.newInstance();
+    private CategoryFragment categoryFragment;
+    private boolean isTablet=false;
+    private CategoryItemFragment categoryItemFragment;
+    FloatingActionButton fab;
+    private FrameLayout categoryItemFragmentContainer;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,11 +47,12 @@ public class MainActivity extends AppCompatActivity implements CategoryFragment.
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = findViewById(R.id.fab);
 
+        categoryFragment=(CategoryFragment) getSupportFragmentManager().findFragmentById(R.id.category_fragment);
+        categoryItemFragmentContainer =findViewById(R.id.category_item_fragment_container);
+        isTablet=categoryItemFragmentContainer!=null;
 
-        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,categoryFragment).commit();
-
+        fab=findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -105,9 +111,53 @@ public class MainActivity extends AppCompatActivity implements CategoryFragment.
 
     private void displayItem(Category category){
 
-        Intent ItemIntent=new Intent(this,CategoryItemActivity.class);
-        ItemIntent.putExtra(CATEGORY_OBJECT_KEY,category);
-        startActivityForResult(ItemIntent,MAIN_ACTIVITY_REQUEST_CODE);
+        if(!isTablet) {
+
+            Intent ItemIntent = new Intent(this, CategoryItemActivity.class);
+            ItemIntent.putExtra(CATEGORY_OBJECT_KEY, category);
+            startActivityForResult(ItemIntent, MAIN_ACTIVITY_REQUEST_CODE);
+        }
+        else{
+
+            if(categoryItemFragment!=null){
+
+                getSupportFragmentManager().beginTransaction().remove(categoryItemFragment).commit();
+                categoryItemFragment=null;
+
+            }
+
+            setTitle(category.getName());
+            categoryItemFragment=CategoryItemFragment.newInstance(category);
+            if(categoryItemFragment!=null){
+                getSupportFragmentManager().beginTransaction().replace(R.id.category_item_fragment_container,categoryItemFragment).addToBackStack(null).commit();
+            }
+
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    displayCreateCategoryItemDialog();
+                }
+
+
+            });
+        }
+
+    }
+
+    private void displayCreateCategoryItemDialog() {
+
+        final EditText itemEditTxt =new EditText(this);
+        itemEditTxt.setInputType(InputType.TYPE_CLASS_TEXT);
+        new AlertDialog.Builder(this).setTitle("Enter the Item name..").setView(itemEditTxt)
+                .setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        String item =itemEditTxt.getText().toString();
+                        categoryItemFragment.addItemToCategory(item);
+                        dialogInterface.dismiss();
+                    }
+                });
 
     }
 
@@ -128,5 +178,33 @@ public class MainActivity extends AppCompatActivity implements CategoryFragment.
     @Override
     public void CategoryIsTapped(Category category) {
             displayItem(category);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        setTitle(getString(R.string.app_name));
+
+        if(categoryItemFragment.category!=null){
+
+            categoryFragment.getManager().saveCategory(categoryItemFragment.category);
+
+        }
+
+        if(categoryItemFragment!=null){
+
+            getSupportFragmentManager().beginTransaction().remove(categoryItemFragment).commit();
+            categoryItemFragment=null;
+
+        }
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayCreateCategoryItemDialog();
+            }
+        });
+
     }
 }

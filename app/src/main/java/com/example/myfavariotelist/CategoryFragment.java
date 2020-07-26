@@ -22,8 +22,9 @@ public class CategoryFragment extends Fragment implements Category_Adpater.Categ
     private RecyclerView recyclerView;
     private Manager manager;
 
-
-
+    public Manager getManager() {
+        return manager;
+    }
 
     interface OnCategoryInteractionListener{
 
